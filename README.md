@@ -1,6 +1,6 @@
-# jeevsarthi_app
+# livestock_jeevsarthi_app
 
-A new Flutter project.
+AI-assisted early warning and health surveillance system for cattle, buffalo, sheep, and goats in low-connectivity areas.
 
 ## Getting Started
 
@@ -15,5 +15,4 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
-# livestock_jeevsarthi_app
-AI-assisted early warning and health surveillance system for cattle, buffalo, sheep, and goats in low-connectivity areas.
+
