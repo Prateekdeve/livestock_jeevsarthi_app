@@ -42,7 +42,7 @@ class _AnimalsScreenState extends State<AnimalsScreen> {
               TextField(controller: tagCtrl, decoration: const InputDecoration(labelText: 'Tag / ID (e.g. MH-1005)', border: OutlineInputBorder())),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
-                value: selectedSpecies,
+                initialValue: selectedSpecies,
                 decoration: const InputDecoration(labelText: 'Species', border: OutlineInputBorder()),
                 items: ['Cow', 'Buffalo', 'Goat', 'Sheep'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
                 onChanged: (val) => setModalState(() => selectedSpecies = val!),

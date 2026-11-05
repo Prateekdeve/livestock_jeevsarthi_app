@@ -73,7 +73,7 @@ class WelcomeScreen extends StatelessWidget {
                     const Spacer(),
                     const Center(
                       child: Text(
-                        'Prototype. Screening results are not diagnoses. Demo records are mock data.',
+                        'Copyright @c 2026',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 11, color: Colors.grey),
                       ),
