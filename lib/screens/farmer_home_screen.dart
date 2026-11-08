@@ -166,7 +166,41 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
             'MODERATE',
             const Color(0xFFFFF3E0),
           ),
+          const SizedBox(height: 8),
+          const Row(
+            children: [
+              Icon(
+                Icons.vaccines_outlined,
+                color: AppTheme.primaryGreen,
+                size: 18,
+              ),
+              SizedBox(width: 6),
+              Text(
+                'Vaccination reminders',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _buildVaccinationReminders(),
+          const SizedBox(height: 14),
+          const Text(
+            'Pashusanket Quick Tools',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          _buildQuickTools(),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _askPashusanket,
+        backgroundColor: AppTheme.primaryGreen,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.auto_awesome, size: 18),
+        label: const Text(
+          'Ask Pashusanket',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
@@ -249,6 +283,139 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildVaccinationReminders() {
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          _buildReminderRow(
+            'Enterotoxaemia (ET) — Chhoti',
+            '2026-10-25',
+            isDueSoon: false,
+          ),
+          _buildReminderRow(
+            'Enterotoxaemia (ET) — Moti',
+            '2026-10-25',
+            isDueSoon: false,
+          ),
+          _buildReminderRow(
+            'Foot & Mouth (FMD) — Gauri',
+            'Due in 2 days (Oct 28)',
+            isDueSoon: true,
+            isLast: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReminderRow(
+    String title,
+    String date, {
+    required bool isDueSoon,
+    bool isLast = false,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      decoration: BoxDecoration(
+        border: isLast
+            ? null
+            : const Border(bottom: BorderSide(color: AppTheme.cardBorder)),
+      ),
+      child: Row(
+        children: [
+          Expanded(child: Text(title, style: const TextStyle(fontSize: 12))),
+          const SizedBox(width: 8),
+          Text(
+            date,
+            style: TextStyle(
+              color: isDueSoon ? AppTheme.warningOrange : AppTheme.primaryGreen,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickTools() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildQuickTool(
+            Icons.medication_outlined,
+            'Medicine &\nWithdrawal',
+            _showToolMessage,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _buildQuickTool(
+            Icons.phone_in_talk_outlined,
+            'Consult Nearby\nVet',
+            _showToolMessage,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _buildQuickTool(
+            Icons.qr_code_2,
+            'Pashu Swasthya\nCard',
+            _showToolMessage,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickTool(IconData icon, String label, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE9FAF2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: AppTheme.primaryGreen, size: 22),
+              ),
+              const SizedBox(height: 7),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showToolMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('This Pashusanket tool is coming soon.')),
+    );
+  }
+
+  void _askPashusanket() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Pashusanket assistant is coming soon.')),
     );
   }
 }
