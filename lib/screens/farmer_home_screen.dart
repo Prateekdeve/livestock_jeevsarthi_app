@@ -5,6 +5,7 @@ import 'animals_screen.dart';
 import 'check_animal_screen.dart';
 import 'reports_screen.dart';
 import 'sync_screen.dart';
+import 'pashusanket_tools_screen.dart';
 
 class FarmerHomeScreen extends StatefulWidget {
   const FarmerHomeScreen({super.key});
@@ -190,17 +191,13 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
           ),
           const SizedBox(height: 8),
           _buildQuickTools(),
+          const SizedBox(height: 28),
+          Align(
+            alignment: Alignment.centerRight,
+            child: _buildAskPashusanketButton(),
+          ),
+          const SizedBox(height: 72),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _askPashusanket,
-        backgroundColor: AppTheme.primaryGreen,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.auto_awesome, size: 18),
-        label: const Text(
-          'Ask Pashusanket',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
@@ -350,7 +347,7 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
           child: _buildQuickTool(
             Icons.medication_outlined,
             'Medicine &\nWithdrawal',
-            _showToolMessage,
+            () => _openTool(const MedicineMonitoringScreen()),
           ),
         ),
         const SizedBox(width: 10),
@@ -358,7 +355,7 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
           child: _buildQuickTool(
             Icons.phone_in_talk_outlined,
             'Consult Nearby\nVet',
-            _showToolMessage,
+            () => _openTool(const ConsultVetScreen()),
           ),
         ),
         const SizedBox(width: 10),
@@ -366,7 +363,7 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
           child: _buildQuickTool(
             Icons.qr_code_2,
             'Pashu Swasthya\nCard',
-            _showToolMessage,
+            () => _openTool(const PashuSwasthyaCardScreen()),
           ),
         ),
       ],
@@ -407,9 +404,24 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
     );
   }
 
-  void _showToolMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('This Pashusanket tool is coming soon.')),
+  void _openTool(Widget screen) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+  }
+
+  Widget _buildAskPashusanketButton() {
+    return ElevatedButton.icon(
+      onPressed: _askPashusanket,
+      icon: const Icon(Icons.auto_awesome, size: 18),
+      label: const Text(
+        'Ask Pashusanket',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppTheme.primaryGreen,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+      ),
     );
   }
 
