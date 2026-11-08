@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
-import '../core/app_theme.dart';
-import 'farmer_home_screen.dart';
 
-class WelcomeScreen extends StatelessWidget {
+import '../core/app_theme.dart';
+import 'admin_dashboard_screen.dart';
+import 'farmer_home_screen.dart';
+import 'vet_queue_screen.dart';
+
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  String selectedLanguage = 'English';
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +34,11 @@ class WelcomeScreen extends StatelessWidget {
             const SizedBox(height: 14),
             const Text(
               'JeevSarthi',
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
             const Text(
               'Livestock health early warning',
@@ -34,7 +48,10 @@ class WelcomeScreen extends StatelessWidget {
             Expanded(
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -45,19 +62,31 @@ class WelcomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Choose language', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    const Text(
+                      'Choose language',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        Expanded(child: _buildLangPill('मराठी', false)),
+                        Expanded(child: _buildLangPill('मराठी')),
                         const SizedBox(width: 8),
-                        Expanded(child: _buildLangPill('हिन्दी', false)),
+                        Expanded(child: _buildLangPill('हिन्दी')),
                         const SizedBox(width: 8),
-                        Expanded(child: _buildLangPill('English', true)),
+                        Expanded(child: _buildLangPill('English')),
                       ],
                     ),
                     const SizedBox(height: 22),
-                    const Text('Continue as (demo access)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    const Text(
+                      'Continue as (demo access)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     _buildRoleCard(
                       context,
@@ -65,11 +94,33 @@ class WelcomeScreen extends StatelessWidget {
                       'Farmer',
                       () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const FarmerHomeScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const FarmerHomeScreen(),
+                        ),
                       ),
                     ),
-                    _buildRoleCard(context, Icons.medical_services_outlined, 'Veterinarian', null),
-                    _buildRoleCard(context, Icons.account_balance, 'Government admin', null),
+                    _buildRoleCard(
+                      context,
+                      Icons.medical_services_outlined,
+                      'Veterinarian',
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const VetQueueScreen(),
+                        ),
+                      ),
+                    ),
+                    _buildRoleCard(
+                      context,
+                      Icons.account_balance,
+                      'Government admin',
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AdminDashboardScreen(),
+                        ),
+                      ),
+                    ),
                     const Spacer(),
                     const Center(
                       child: Text(
@@ -88,27 +139,39 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLangPill(String text, bool isSelected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFFE8F5E9) : Colors.white,
-        border: Border.all(color: isSelected ? AppTheme.primaryGreen : Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: isSelected ? AppTheme.primaryGreen : Colors.black87,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          fontSize: 13,
+  Widget _buildLangPill(String text) {
+    final isSelected = selectedLanguage == text;
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: () => setState(() => selectedLanguage = text),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFE8F5E9) : Colors.white,
+          border: Border.all(
+            color: isSelected ? AppTheme.primaryGreen : Colors.grey.shade300,
+          ),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: isSelected ? AppTheme.primaryGreen : Colors.black87,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontSize: 13,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildRoleCard(BuildContext context, IconData icon, String title, VoidCallback? onTap) {
+  Widget _buildRoleCard(
+    BuildContext context,
+    IconData icon,
+    String title,
+    VoidCallback? onTap,
+  ) {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
@@ -116,7 +179,10 @@ class WelcomeScreen extends StatelessWidget {
           backgroundColor: AppTheme.primaryGreen,
           child: Icon(icon, color: Colors.white, size: 20),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
         trailing: const Icon(Icons.chevron_right, color: Colors.grey),
         onTap: onTap,
       ),
