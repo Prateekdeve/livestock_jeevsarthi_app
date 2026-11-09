@@ -2,34 +2,34 @@ import 'package:flutter/material.dart';
 
 import '../core/app_theme.dart';
 import '../models/animal_model.dart';
+import '../data/repositories/report_repository.dart';
 import 'farmer_home_screen.dart';
 
-class ReportsScreen extends StatelessWidget {
+class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
 
-  static const reports = [
-    (
-      animalName: 'Gauri',
-      species: 'Cow',
-      status: 'Under review',
-      urgency: 'MODERATE',
-      disease: 'Foot-and-Mouth Disease (FMD)',
-    ),
-    (
-      animalName: 'Kalu',
-      species: 'Buffalo',
-      status: 'Treated',
-      urgency: 'MODERATE',
-      disease: 'Lumpy Skin Disease (LSD)',
-    ),
-    (
-      animalName: 'Chhoti',
-      species: 'Goat',
-      status: 'New',
-      urgency: 'MODERATE',
-      disease: 'Peste des Petits Ruminants (PPR)',
-    ),
-  ];
+  @override
+  State<ReportsScreen> createState() => _ReportsScreenState();
+}
+
+class _ReportsScreenState extends State<ReportsScreen> {
+  final ReportRepository _reportRepository = OfflineFirstReportRepository();
+  List<TriageResult> reports = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReports();
+  }
+
+  Future<void> _loadReports() async {
+    final list = await _reportRepository.getReports();
+    if (mounted) {
+      setState(() {
+        reports = list;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,25 +70,14 @@ class ReportsScreen extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(
-                  '${report.status} • ${report.disease}',
+                  '${report.status} • ${report.suspectedDisease}',
                   style: const TextStyle(fontSize: 12),
                 ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => ScreeningResultScreen(
-                      result: TriageResult(
-                        animalName: report.animalName,
-                        species: report.species,
-                        urgency: report.urgency,
-                        suspectedDisease: report.disease,
-                        keySigns: const ['Reported symptoms under review'],
-                        nextSteps: const [
-                          'A veterinarian will review this report.',
-                        ],
-                      ),
-                    ),
+                    builder: (_) => ScreeningResultScreen(result: report),
                   ),
                 ),
               ),
@@ -176,9 +165,9 @@ class ScreeningResultScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            const Text(
-                              'Status: Under review',
-                              style: TextStyle(
+                            Text(
+                              'Status: ${result.status}',
+                              style: const TextStyle(
                                 color: Colors.grey,
                                 fontSize: 12,
                               ),
@@ -188,9 +177,12 @@ class ScreeningResultScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const Text(
-                    'Mock data',
-                    style: TextStyle(fontSize: 11, color: Colors.green),
+                  Text(
+                    result.isSynced ? 'Synced' : 'Local (Offline)',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: result.isSynced ? Colors.green : Colors.orange,
+                    ),
                   ),
                 ],
               ),

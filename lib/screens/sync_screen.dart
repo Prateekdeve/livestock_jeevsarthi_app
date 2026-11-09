@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../core/app_config.dart';
 import '../core/app_theme.dart';
+import '../data/sync/sync_service.dart';
 
 class SyncScreen extends StatefulWidget {
   const SyncScreen({super.key});
@@ -13,20 +15,53 @@ class _SyncScreenState extends State<SyncScreen> {
   bool simulateFailure = false;
   int queueCount = 0;
   String syncLog = 'No sync activity yet.';
+  bool isLoading = false;
 
-  void _triggerSync() {
+  @override
+  void initState() {
+    super.initState();
+    _refreshStatus();
+  }
+
+  Future<void> _refreshStatus() async {
+    final count = await SyncService.instance.getPendingCount();
+    if (mounted) {
+      setState(() {
+        queueCount = count;
+        isOnline = !AppConfig.isOfflineDemoMode;
+      });
+    }
+  }
+
+  Future<void> _toggleOnlineOffline() async {
+    final newMode = !isOnline;
+    await AppConfig.setOfflineDemoMode(!newMode);
+    setState(() {
+      isOnline = newMode;
+    });
+  }
+
+  Future<void> _triggerSync() async {
     if (!isOnline) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cannot sync while in offline mode.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot sync while in offline mode.')),
+      );
       return;
     }
-    setState(() {
-      if (simulateFailure) {
-        syncLog = 'Sync failed: Connection timeout / 503 Service Unavailable.';
-      } else {
-        queueCount = 0;
-        syncLog = 'Successfully synced with server at ${TimeOfDay.now().format(context)}.';
-      }
-    });
+
+    setState(() => isLoading = true);
+
+    final result = await SyncService.instance.syncNow(
+      simulateFailure: simulateFailure,
+    );
+
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+        queueCount = result.remainingPendingCount;
+        syncLog = result.message;
+      });
+    }
   }
 
   @override
@@ -54,28 +89,41 @@ class _SyncScreenState extends State<SyncScreen> {
                   Row(
                     children: [
                       const Text('Connection: ', style: TextStyle(fontSize: 15)),
-                      Text(isOnline ? 'Online' : 'Offline', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: isOnline ? AppTheme.primaryGreen : Colors.red)),
+                      Text(
+                        isOnline ? 'Online' : 'Offline',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: isOnline ? AppTheme.primaryGreen : Colors.red,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 14),
                   OutlinedButton(
-                    onPressed: () => setState(() => isOnline = !isOnline),
+                    onPressed: _toggleOnlineOffline,
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       side: const BorderSide(color: AppTheme.primaryGreen),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    child: Text(isOnline ? 'Go offline (demo)' : 'Go online (demo)', style: const TextStyle(color: AppTheme.primaryGreen, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      isOnline ? 'Go offline (demo)' : 'Go online (demo)',
+                      style: const TextStyle(color: AppTheme.primaryGreen, fontWeight: FontWeight.bold),
+                    ),
                   ),
                   const SizedBox(height: 10),
                   ElevatedButton(
-                    onPressed: isOnline ? _triggerSync : null,
+                    onPressed: (isOnline && !isLoading) ? _triggerSync : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isOnline ? AppTheme.primaryGreen : Colors.grey.shade300,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    child: const Text('Retry sync now', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      isLoading ? 'Syncing...' : 'Retry sync now',
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
                   ),
                   const SizedBox(height: 10),
                   CheckboxListTile(
@@ -89,13 +137,16 @@ class _SyncScreenState extends State<SyncScreen> {
             ),
           ),
           const SizedBox(height: 18),
-          const Text('Queue (0)', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          Text('Queue ($queueCount)', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
           const SizedBox(height: 6),
           Card(
             margin: EdgeInsets.zero,
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(queueCount == 0 ? 'Everything is synced.' : '$queueCount reports pending sync.', style: const TextStyle(color: Colors.black87)),
+              child: Text(
+                queueCount == 0 ? 'Everything is synced.' : '$queueCount reports pending sync.',
+                style: const TextStyle(color: Colors.black87),
+              ),
             ),
           ),
           const SizedBox(height: 18),

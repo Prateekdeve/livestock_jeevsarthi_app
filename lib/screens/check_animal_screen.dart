@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../models/animal_model.dart';
+import '../data/repositories/animal_repository.dart';
+import '../data/repositories/report_repository.dart';
 import 'reports_screen.dart';
 
 class CheckAnimalScreen extends StatefulWidget {
@@ -11,18 +13,13 @@ class CheckAnimalScreen extends StatefulWidget {
 }
 
 class _CheckAnimalScreenState extends State<CheckAnimalScreen> {
+  final AnimalRepository _animalRepository = OfflineFirstAnimalRepository();
+  final ReportRepository _reportRepository = OfflineFirstReportRepository();
+
   int currentStep = 1; // Step 1 to 15
   final int totalSteps = 15;
 
-  // Mock animals list (Screen 6)
-  final List<Animal> animals = [
-    Animal(id: '1', name: 'Gauri', tag: 'MH-1001', species: 'Cow', location: 'Baramati, Pune', isLactating: true),
-    Animal(id: '2', name: 'Kalu', tag: 'MH-1002', species: 'Buffalo', location: 'Sangamner, Ahmednagar', isLactating: true),
-    Animal(id: '3', name: 'Chhoti', tag: 'MH-1003', species: 'Goat', location: 'Phaltan, Satara'),
-    Animal(id: '4', name: 'Moti', tag: 'MH-1004', species: 'Sheep', location: 'Sinnar, Nashik'),
-    Animal(id: '5', name: 'Shyama', tag: 'MH-1005', species: 'Cow', location: 'Kagal, Kolhapur'),
-  ];
-
+  List<Animal> animals = [];
   Animal? selectedAnimal;
 
   // Answers State
@@ -37,6 +34,24 @@ class _CheckAnimalScreenState extends State<CheckAnimalScreen> {
   int? salivationIndex;
   int? udderIndex;
   int? lamenessIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAnimals();
+  }
+
+  Future<void> _loadAnimals() async {
+    final list = await _animalRepository.getAnimals();
+    if (mounted) {
+      setState(() {
+        animals = list;
+        if (animals.isNotEmpty && selectedAnimal == null) {
+          selectedAnimal = animals.first;
+        }
+      });
+    }
+  }
 
   void _nextStep() {
     if (currentStep < totalSteps) {
@@ -54,7 +69,7 @@ class _CheckAnimalScreenState extends State<CheckAnimalScreen> {
     }
   }
 
-  void _evaluateAndFinish() {
+  Future<void> _evaluateAndFinish() async {
     // Decision rule evaluation
     String urgency = 'MODERATE';
     String disease = 'General Observation';
@@ -104,18 +119,29 @@ class _CheckAnimalScreenState extends State<CheckAnimalScreen> {
     }
 
     final result = TriageResult(
+      id: 'rep-${DateTime.now().millisecondsSinceEpoch}',
+      animalId: selectedAnimal?.id,
       animalName: selectedAnimal?.name ?? 'Animal',
       species: selectedAnimal?.species ?? 'Bovine',
       urgency: urgency,
       suspectedDisease: disease,
       keySigns: signs.isEmpty ? ['Loss of appetite', 'Dullness'] : signs,
       nextSteps: nextSteps,
+      isEmergencyTriggered: urgency == 'EMERGENCY',
+      status: 'New',
+      location: selectedAnimal?.location ?? 'Maharashtra',
+      isSynced: false,
     );
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => ScreeningResultScreen(result: result)),
-    );
+    // Save to offline SQLite database & enqueue for sync
+    await _reportRepository.saveReport(result);
+
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => ScreeningResultScreen(result: result)),
+      );
+    }
   }
 
   @override

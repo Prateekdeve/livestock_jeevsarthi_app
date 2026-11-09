@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../models/animal_model.dart';
+import '../data/repositories/animal_repository.dart';
 
 class AnimalsScreen extends StatefulWidget {
   const AnimalsScreen({super.key});
@@ -10,12 +11,23 @@ class AnimalsScreen extends StatefulWidget {
 }
 
 class _AnimalsScreenState extends State<AnimalsScreen> {
-  final List<Animal> animalsList = [
-    Animal(id: '1', name: 'Gauri', tag: 'MH-1001', species: 'Cow', location: 'Malegaon, Baramati, Pune', isLactating: true),
-    Animal(id: '2', name: 'Kalu', tag: 'MH-1002', species: 'Buffalo', location: 'Ghulewadi, Sangamner, Ahmednagar', isLactating: true),
-    Animal(id: '3', name: 'Chhoti', tag: 'MH-1003', species: 'Goat', location: 'Taradgaon, Phaltan, Satara', isLactating: false),
-    Animal(id: '4', name: 'Moti', tag: 'MH-1004', species: 'Sheep', location: 'Wavi, Sinnar, Nashik', isLactating: false),
-  ];
+  final AnimalRepository _animalRepository = OfflineFirstAnimalRepository();
+  List<Animal> animalsList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAnimals();
+  }
+
+  Future<void> _loadAnimals() async {
+    final list = await _animalRepository.getAnimals();
+    if (mounted) {
+      setState(() {
+        animalsList = list;
+      });
+    }
+  }
 
   void _showAddAnimalDialog() {
     final nameCtrl = TextEditingController();
@@ -58,19 +70,21 @@ class _AnimalsScreenState extends State<AnimalsScreen> {
               ),
               const SizedBox(height: 14),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (nameCtrl.text.isNotEmpty && tagCtrl.text.isNotEmpty) {
-                    setState(() {
-                      animalsList.add(Animal(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
-                        name: nameCtrl.text.trim(),
-                        tag: tagCtrl.text.trim(),
-                        species: selectedSpecies,
-                        location: locCtrl.text.trim().isEmpty ? 'Maharashtra' : locCtrl.text.trim(),
-                        isLactating: isLactating,
-                      ));
-                    });
-                    Navigator.pop(ctx);
+                    final newAnimal = Animal(
+                      id: DateTime.now().millisecondsSinceEpoch.toString(),
+                      name: nameCtrl.text.trim(),
+                      tag: tagCtrl.text.trim(),
+                      species: selectedSpecies,
+                      location: locCtrl.text.trim().isEmpty ? 'Maharashtra' : locCtrl.text.trim(),
+                      isLactating: isLactating,
+                    );
+                    await _animalRepository.saveAnimal(newAnimal);
+                    await _loadAnimals();
+                    if (ctx.mounted) {
+                      Navigator.pop(ctx);
+                    }
                   }
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryGreen, padding: const EdgeInsets.symmetric(vertical: 14)),
@@ -135,7 +149,7 @@ class _AnimalsScreenState extends State<AnimalsScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('${a.name} ${a.tag}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                          const Text('Mock data', style: TextStyle(fontSize: 11, color: Colors.green)),
+                          Text(a.isSynced ? 'Synced' : 'Local (Offline)', style: TextStyle(fontSize: 11, color: a.isSynced ? Colors.green : Colors.orange)),
                         ],
                       ),
                       Text('${a.species}${a.isLactating ? " • lactating" : ""} • ${a.location}', style: const TextStyle(color: Colors.grey, fontSize: 12)),

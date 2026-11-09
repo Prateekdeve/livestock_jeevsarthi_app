@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_theme.dart';
+import '../data/database_helper.dart';
 import 'sync_screen.dart';
 
-class VetQueueScreen extends StatelessWidget {
+class VetQueueScreen extends StatefulWidget {
   const VetQueueScreen({super.key});
 
-  static const List<Map<String, String>> cases = [
+  @override
+  State<VetQueueScreen> createState() => _VetQueueScreenState();
+}
+
+class _VetQueueScreenState extends State<VetQueueScreen> {
+  List<Map<String, String>> cases = [];
+
+  static const List<Map<String, String>> defaultCases = [
     {
       'title': 'Shyama • Cow',
       'loc': 'Murgud, Kagal, Kolhapur • Escalated',
@@ -40,7 +48,45 @@ class VetQueueScreen extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadCases();
+  }
+
+  Future<void> _loadCases() async {
+    try {
+      final reports = await DatabaseHelper.instance.getAllReports();
+      if (reports.isNotEmpty && mounted) {
+        setState(() {
+          cases = reports.map((r) {
+            String shortDisease = r.suspectedDisease;
+            if (shortDisease.contains('(') && shortDisease.contains(')')) {
+              shortDisease = shortDisease.split('(').last.replaceAll(')', '').trim();
+            }
+            return {
+              'title': '${r.animalName} • ${r.species}',
+              'loc': '${r.location} • ${r.status}',
+              'disease': shortDisease,
+              'urgency': r.urgency,
+            };
+          }).toList();
+        });
+      } else {
+        setState(() {
+          cases = defaultCases;
+        });
+      }
+    } catch (_) {
+      setState(() {
+        cases = defaultCases;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final displayCases = cases.isNotEmpty ? cases : defaultCases;
+
     return Scaffold(
       appBar: AppBar(
         title: const Column(
@@ -60,7 +106,7 @@ class VetQueueScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          ...cases.map((c) {
+          ...displayCases.map((c) {
             final isEmergency = c['urgency'] == 'EMERGENCY';
             final isHigh = c['urgency'] == 'HIGH';
             return Card(
@@ -100,8 +146,8 @@ class VetQueueScreen extends StatelessWidget {
                     color: isEmergency
                         ? Colors.red
                         : (isHigh
-                              ? Colors.pink.shade100
-                              : Colors.orange.shade100),
+                            ? Colors.pink.shade100
+                            : Colors.orange.shade100),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -112,8 +158,8 @@ class VetQueueScreen extends StatelessWidget {
                       color: isEmergency
                           ? Colors.white
                           : (isHigh
-                                ? Colors.pink.shade900
-                                : Colors.orange.shade900),
+                              ? Colors.pink.shade900
+                              : Colors.orange.shade900),
                     ),
                   ),
                 ),

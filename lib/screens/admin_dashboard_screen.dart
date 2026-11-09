@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_theme.dart';
+import '../data/database_helper.dart';
 
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
 
-  static const List<Map<String, Object>> diseaseStats = [
+  @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  int totalCases = 5;
+  int emergencies = 1;
+  int deaths = 1;
+
+  List<Map<String, Object>> diseaseStats = [
     {'name': 'Foot-and-Mouth Disease (FMD)', 'count': 1},
     {'name': 'Lumpy Skin Disease (LSD)', 'count': 1},
     {'name': 'Black Quarter (BQ)', 'count': 0},
@@ -15,6 +25,42 @@ class AdminDashboardScreen extends StatelessWidget {
     {'name': 'Peste des Petits Ruminants (PPR)', 'count': 1},
     {'name': 'Enterotoxaemia (ET)', 'count': 1},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    try {
+      final reports = await DatabaseHelper.instance.getAllReports();
+      if (reports.isNotEmpty && mounted) {
+        setState(() {
+          totalCases = reports.length;
+          emergencies = reports.where((r) => r.urgency == 'EMERGENCY').length;
+          deaths = reports.where((r) => r.status == 'Died').length;
+
+          final counts = <String, int>{};
+          for (final r in reports) {
+            for (final stat in diseaseStats) {
+              final name = stat['name'] as String;
+              final shortCode = name.split('(').last.replaceAll(')', '').trim();
+              if (r.suspectedDisease.contains(shortCode) ||
+                  name.toLowerCase().contains(r.suspectedDisease.toLowerCase())) {
+                counts[name] = (counts[name] ?? 0) + 1;
+              }
+            }
+          }
+
+          diseaseStats = diseaseStats.map((d) {
+            final name = d['name'] as String;
+            return {'name': name, 'count': counts[name] ?? 0};
+          }).toList();
+        });
+      }
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,17 +90,17 @@ class AdminDashboardScreen extends StatelessWidget {
           const SizedBox(height: 14),
           Row(
             children: [
-              Expanded(child: _buildMetricTile('5', 'Suspected cases')),
+              Expanded(child: _buildMetricTile('$totalCases', 'Suspected cases')),
               const SizedBox(width: 10),
               Expanded(
-                child: _buildMetricTile('1', 'Emergencies', isAlert: true),
+                child: _buildMetricTile('$emergencies', 'Emergencies', isAlert: true),
               ),
             ],
           ),
           const SizedBox(height: 10),
           Row(
             children: [
-              Expanded(child: _buildMetricTile('1', 'Deaths reported')),
+              Expanded(child: _buildMetricTile('$deaths', 'Deaths reported')),
               const SizedBox(width: 10),
               Expanded(child: _buildMetricTile('23%', 'Vaccination coverage')),
             ],
@@ -100,7 +146,7 @@ class AdminDashboardScreen extends StatelessWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(4),
                           child: LinearProgressIndicator(
-                            value: count > 0 ? (count / 2.0) : 0.0,
+                            value: count > 0 ? (count / 5.0).clamp(0.0, 1.0) : 0.0,
                             minHeight: 6,
                             backgroundColor: Colors.grey.shade200,
                             color: count > 0

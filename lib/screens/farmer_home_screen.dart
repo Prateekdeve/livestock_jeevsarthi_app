@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_theme.dart';
+import '../data/database_helper.dart';
+import '../models/animal_model.dart';
 import 'animals_screen.dart';
 import 'check_animal_screen.dart';
 import 'reports_screen.dart';
@@ -16,8 +18,36 @@ class FarmerHomeScreen extends StatefulWidget {
 
 class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
   int currentIndex = 0;
+  int animalCount = 5;
+  int openCasesCount = 5;
+  List<TriageResult> recentAlerts = [];
+  List<VaccineRecord> vaccinationReminders = [];
 
-  void _openTab(int index) {
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboardData();
+  }
+
+  Future<void> _loadDashboardData() async {
+    try {
+      final animals = await DatabaseHelper.instance.getAllAnimals();
+      final reports = await DatabaseHelper.instance.getAllReports();
+      final vaccines = await DatabaseHelper.instance.getAllVaccinations();
+
+      if (mounted) {
+        setState(() {
+          animalCount = animals.isNotEmpty ? animals.length : 5;
+          final active = reports.where((r) => r.status != 'Treated' && r.status != 'Died').toList();
+          openCasesCount = active.isNotEmpty ? active.length : (reports.isNotEmpty ? reports.length : 5);
+          recentAlerts = reports.take(3).toList();
+          vaccinationReminders = vaccines.take(3).toList();
+        });
+      }
+    } catch (_) {}
+  }
+
+  void _openTab(int index) async {
     if (index == 0) {
       setState(() => currentIndex = 0);
       return;
@@ -32,7 +62,8 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
     };
 
     if (screen != null) {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+      _loadDashboardData();
     }
   }
 
@@ -123,7 +154,7 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: () => _openTab(1),
-                  child: _buildMetricCard(Icons.pets, '5', 'Animals'),
+                  child: _buildMetricCard(Icons.pets, '$animalCount', 'Animals'),
                 ),
               ),
               const SizedBox(width: 12),
@@ -133,7 +164,7 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
                   onTap: () => _openTab(3),
                   child: _buildMetricCard(
                     Icons.notifications_none,
-                    '5',
+                    '$openCasesCount',
                     'Open cases',
                   ),
                 ),
@@ -146,27 +177,41 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          _buildAlertCard(
-            context,
-            'Gauri • Cow',
-            'Under review • 10/19/2026',
-            'MODERATE',
-            const Color(0xFFFFF3E0),
-          ),
-          _buildAlertCard(
-            context,
-            'Kalu • Buffalo',
-            'Treated • 10/16/2026',
-            'MODERATE',
-            const Color(0xFFFFF3E0),
-          ),
-          _buildAlertCard(
-            context,
-            'Chhoti • Goat',
-            'New • 10/20/2026',
-            'MODERATE',
-            const Color(0xFFFFF3E0),
-          ),
+          if (recentAlerts.isNotEmpty)
+            ...recentAlerts.map(
+              (r) => _buildAlertCard(
+                context,
+                '${r.animalName} • ${r.species}',
+                '${r.status} • ${r.createdAt.split("T").first}',
+                r.urgency,
+                r.urgency == 'EMERGENCY'
+                    ? const Color(0xFFFFEBEE)
+                    : const Color(0xFFFFF3E0),
+              ),
+            )
+          else ...[
+            _buildAlertCard(
+              context,
+              'Gauri • Cow',
+              'Under review • 10/19/2026',
+              'MODERATE',
+              const Color(0xFFFFF3E0),
+            ),
+            _buildAlertCard(
+              context,
+              'Kalu • Buffalo',
+              'Treated • 10/16/2026',
+              'MODERATE',
+              const Color(0xFFFFF3E0),
+            ),
+            _buildAlertCard(
+              context,
+              'Chhoti • Goat',
+              'New • 10/20/2026',
+              'MODERATE',
+              const Color(0xFFFFF3E0),
+            ),
+          ],
           const SizedBox(height: 8),
           const Row(
             children: [
@@ -272,10 +317,10 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
           ),
           child: Text(
             badgeText,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
-              color: Colors.orange,
+              color: badgeText == 'EMERGENCY' ? Colors.red : Colors.orange,
             ),
           ),
         ),
@@ -284,6 +329,26 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
   }
 
   Widget _buildVaccinationReminders() {
+    if (vaccinationReminders.isNotEmpty) {
+      return Card(
+        margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          children: vaccinationReminders.asMap().entries.map((entry) {
+            final idx = entry.key;
+            final v = entry.value;
+            final isLast = idx == vaccinationReminders.length - 1;
+            return _buildReminderRow(
+              '${v.vaccineName} — ${v.animalName}',
+              v.dueDate,
+              isDueSoon: v.dueDate.contains('28') || v.dueDate.contains('Due'),
+              isLast: isLast,
+            );
+          }).toList(),
+        ),
+      );
+    }
+
     return Card(
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
