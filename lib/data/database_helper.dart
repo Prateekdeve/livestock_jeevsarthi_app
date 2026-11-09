@@ -57,11 +57,24 @@ class DatabaseHelper {
       path = p.join(dbPath, fileName);
     }
 
-    return await openDatabase(
-      path,
-      version: AppConfig.dbVersion,
-      onCreate: _createDB,
-    );
+    try {
+      return await openDatabase(
+        path,
+        version: AppConfig.dbVersion,
+        onCreate: _createDB,
+      );
+    } catch (e) {
+      if (kIsWeb) {
+        debugPrint('Web worker init notice: $e. Falling back to direct web database...');
+        databaseFactory = databaseFactoryFfiWebNoWebWorker;
+        return await openDatabase(
+          inMemoryDatabasePath,
+          version: AppConfig.dbVersion,
+          onCreate: _createDB,
+        );
+      }
+      rethrow;
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {

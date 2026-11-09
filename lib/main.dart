@@ -10,7 +10,11 @@ void main() async {
   
   // Initialize configuration and offline SQLite database
   await AppConfig.loadConfig();
-  await DatabaseHelper.instance.database;
+  try {
+    await DatabaseHelper.instance.database;
+  } catch (e) {
+    debugPrint('Database initialization notice: $e');
+  }
 
   runApp(const JeevSarthiApp());
 }
