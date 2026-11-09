@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../core/app_config.dart';
 import '../core/app_theme.dart';
+import '../core/localization.dart';
 import 'admin_dashboard_screen.dart';
 import 'farmer_home_screen.dart';
 import 'vet_queue_screen.dart';
@@ -13,60 +15,92 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  String selectedLanguage = 'English';
+  late String selectedLanguage;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedLanguage = AppConfig.selectedLanguage;
+  }
+
+  void _onSelectLanguage(String lang) {
+    setState(() {
+      selectedLanguage = lang;
+    });
+    AppConfig.setSelectedLanguage(lang);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final t = AppStrings.of(selectedLanguage);
+
     return Scaffold(
       backgroundColor: AppTheme.primaryGreen,
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 36),
+            const SizedBox(height: 24),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(18),
               ),
-              child: const Icon(Icons.pets, size: 40, color: Colors.black87),
+              child: const Text('🐄', style: TextStyle(fontSize: 34)),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             const Text(
               'JeevSarthi',
               style: TextStyle(
-                fontSize: 26,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
+                letterSpacing: 0.5,
               ),
             ),
+            const SizedBox(height: 3),
             const Text(
-              'Livestock health early warning',
-              style: TextStyle(color: Colors.white70, fontSize: 13),
+              'PASHUSANKET SURVEILLANCE SUITE',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.1,
+              ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 4),
+            Text(
+              t.appSubtitle,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 24),
             Expanded(
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
-                  vertical: 24,
+                  vertical: 22,
                 ),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
                   ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Choose language',
-                      style: TextStyle(
+                    Text(
+                      t.chooseLanguage,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
+                        color: Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -79,19 +113,21 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         Expanded(child: _buildLangPill('English')),
                       ],
                     ),
-                    const SizedBox(height: 22),
-                    const Text(
-                      'Continue as (demo access)',
-                      style: TextStyle(
+                    const SizedBox(height: 20),
+                    Text(
+                      t.continueAs,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
+                        color: Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 10),
                     _buildRoleCard(
                       context,
                       Icons.agriculture,
-                      'Farmer',
+                      t.farmerRole,
+                      t.farmerDescription,
                       () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -99,10 +135,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 10),
                     _buildRoleCard(
                       context,
-                      Icons.medical_services_outlined,
-                      'Veterinarian',
+                      Icons.healing,
+                      t.vetRole,
+                      t.vetDescription,
                       () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -110,10 +148,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 10),
                     _buildRoleCard(
                       context,
                       Icons.account_balance,
-                      'Government admin',
+                      t.adminRole,
+                      t.adminDescription,
                       () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -122,11 +162,41 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       ),
                     ),
                     const Spacer(),
-                    const Center(
-                      child: Text(
-                        'Copyright @c 2026',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 9,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF9FAFB),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE5E7EB)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('🐄 🐃 🐐 🐑', style: TextStyle(fontSize: 12)),
+                          const SizedBox(width: 6),
+                          Text(
+                            t.speciesSummary,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF374151),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      t.disclaimer,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey,
+                        height: 1.3,
                       ),
                     ),
                   ],
@@ -143,14 +213,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     final isSelected = selectedLanguage == text;
     return InkWell(
       borderRadius: BorderRadius.circular(20),
-      onTap: () => setState(() => selectedLanguage = text),
+      onTap: () => _onSelectLanguage(text),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 9),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFE8F5E9) : Colors.white,
           border: Border.all(
             color: isSelected ? AppTheme.primaryGreen : Colors.grey.shade300,
+            width: isSelected ? 1.5 : 1.0,
           ),
           borderRadius: BorderRadius.circular(20),
         ),
@@ -158,7 +229,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           text,
           style: TextStyle(
             color: isSelected ? AppTheme.primaryGreen : Colors.black87,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
             fontSize: 13,
           ),
         ),
@@ -170,21 +241,55 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     BuildContext context,
     IconData icon,
     String title,
+    String subtitle,
     VoidCallback? onTap,
   ) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: AppTheme.primaryGreen,
-          child: Icon(icon, color: Colors.white, size: 20),
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
         ),
-        title: Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 19,
+              backgroundColor: const Color(0xFF1E824C),
+              child: Icon(icon, color: Colors.white, size: 19),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey.shade600,
+                      height: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 6),
+            Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 18),
+          ],
         ),
-        trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-        onTap: onTap,
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../core/app_config.dart';
 import '../core/app_theme.dart';
+import '../core/localization.dart';
 import '../data/database_helper.dart';
 import '../models/animal_model.dart';
 import 'animals_screen.dart';
@@ -71,16 +73,16 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'JeevSarthi • Farmer',
               style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal),
             ),
             Text(
-              'Namaskar 🙏',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              AppStrings.of(AppConfig.selectedLanguage).farmerGreeting,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
         ),
