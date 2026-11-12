@@ -92,11 +92,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     topRight: Radius.circular(28),
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t.chooseLanguage,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t.chooseLanguage,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
@@ -161,48 +162,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ),
                       ),
                     ),
-                    const Spacer(),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 9,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF9FAFB),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE5E7EB)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('🐄 🐃 🐐 🐑', style: TextStyle(fontSize: 12)),
-                          const SizedBox(width: 6),
-                          Text(
-                            t.speciesSummary,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF374151),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      t.disclaimer,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey,
-                        height: 1.3,
-                      ),
-                    ),
                   ],
                 ),
               ),
             ),
+          ),
           ],
         ),
       ),

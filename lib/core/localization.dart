@@ -30,7 +30,7 @@ class AppStrings {
   static const AppStrings marathi = AppStrings(
     appSubtitle: 'पशुधन आरोग्य पूर्वसूचना प्रणाली',
     chooseLanguage: 'भाषा निवडा',
-    continueAs: 'पुढे जा (डेमो प्रवेश)',
+    continueAs: 'पुढे जा',
     farmerRole: 'शेतकरी (Farmer)',
     farmerDescription: 'Check sick animals, vaccination & withdrawal alerts',
     vetRole: 'पशुवैद्यक (Veterinarian)',
@@ -46,7 +46,7 @@ class AppStrings {
   static const AppStrings hindi = AppStrings(
     appSubtitle: 'पशु स्वास्थ्य पूर्व चेतावनी प्रणाली',
     chooseLanguage: 'भाषा चुनें',
-    continueAs: 'आगे बढ़ें (डेमो एक्सेस)',
+    continueAs: 'आगे बढ़ें',
     farmerRole: 'किसान (Farmer)',
     farmerDescription: 'Check sick animals, vaccination & withdrawal alerts',
     vetRole: 'पशु चिकित्सक (Veterinarian)',
@@ -62,7 +62,7 @@ class AppStrings {
   static const AppStrings english = AppStrings(
     appSubtitle: 'Livestock health early warning',
     chooseLanguage: 'Choose language',
-    continueAs: 'Continue as (demo access)',
+    continueAs: 'Continue as',
     farmerRole: 'Farmer',
     farmerDescription: 'Check sick animals, vaccination & withdrawal alerts',
     vetRole: 'Veterinarian',

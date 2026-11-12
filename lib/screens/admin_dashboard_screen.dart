@@ -84,7 +84,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           const Text(
-            'Includes mock demo records (Pune, Ahmednagar, Satara, Nashik, Kolhapur) plus newly synced reports.',
+            'Includes surveillance records (Pune, Ahmednagar, Satara, Nashik, Kolhapur) plus newly synced reports.',
             style: TextStyle(fontSize: 12, color: Colors.grey),
           ),
           const SizedBox(height: 14),

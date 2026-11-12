@@ -108,7 +108,7 @@ class _SyncScreenState extends State<SyncScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     child: Text(
-                      isOnline ? 'Go offline (demo)' : 'Go online (demo)',
+                      isOnline ? 'Go offline' : 'Go online',
                       style: const TextStyle(color: AppTheme.primaryGreen, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -161,7 +161,7 @@ class _SyncScreenState extends State<SyncScreen> {
           ),
           const SizedBox(height: 20),
           const Text(
-            'Data is stored on this device. The server is simulated in-browser for this demo; each record has a stable client ID so re-sending never creates duplicates.',
+            'Data is stored on this device. Each record has a stable client ID so re-sending never creates duplicates.',
             style: TextStyle(fontSize: 11, color: Colors.grey),
           ),
         ],

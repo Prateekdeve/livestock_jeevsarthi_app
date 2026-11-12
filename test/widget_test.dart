@@ -1,30 +1,50 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:jeevsarthi_app/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
+  testWidgets('JeevSarthi welcome screen renders and language changes work',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const JeevSarthiApp());
+    await tester.pumpAndSettle();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verify JeevSarthi header
+    expect(find.text('JeevSarthi'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Verify language pills exist
+    expect(find.text('मराठी'), findsOneWidget);
+    expect(find.text('हिन्दी'), findsOneWidget);
+    expect(find.text('English'), findsOneWidget);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Switch to Hindi
+    await tester.tap(find.text('हिन्दी'));
+    await tester.pumpAndSettle();
+
+    // Verify Hindi labels
+    expect(find.text('भाषा चुनें'), findsOneWidget);
+    expect(find.text('आगे बढ़ें'), findsOneWidget);
+    expect(find.text('किसान (Farmer)'), findsOneWidget);
+
+    // Switch to Marathi
+    await tester.tap(find.text('मराठी'));
+    await tester.pumpAndSettle();
+
+    // Verify Marathi labels
+    expect(find.text('भाषा निवडा'), findsOneWidget);
+    expect(find.text('पुढे जा'), findsOneWidget);
+    expect(find.text('शेतकरी (Farmer)'), findsOneWidget);
+
+    // Switch back to English
+    await tester.tap(find.text('English'));
+    await tester.pumpAndSettle();
+
+    // Verify English labels
+    expect(find.text('Choose language'), findsOneWidget);
+    expect(find.text('Continue as'), findsOneWidget);
+    expect(find.text('Farmer'), findsOneWidget);
   });
 }
